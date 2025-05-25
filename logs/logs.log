@@ -1,0 +1,6 @@
+2025-05-25T01:19:36.131Z  WARN 51360 --- [admin-management] [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=23m13s222ms229µs400ns).
+2025-05-25T01:19:41.260Z  INFO 51360 --- [admin-management] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-25T01:19:41.518Z  INFO 51360 --- [admin-management] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-05-25T01:19:41.624Z  INFO 51360 --- [admin-management] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-25T01:19:41.683Z  INFO 51360 --- [admin-management] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-25T01:19:41.703Z  INFO 51360 --- [admin-management] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

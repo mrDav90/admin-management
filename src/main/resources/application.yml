@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: admin-management
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3307/${DB_NAME:admin_management_db}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.server-url}/realms/${keycloak.realm}
+          jwk-set-uri: ${keycloak.server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+      keycloak: DEBUG
+  file:
+    name: logs/logs.log
+
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${keycloak.client-id}
+      client-secret: ${keycloak.client-secret}
+server:
+  port: 8085

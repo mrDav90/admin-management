@@ -1,14 +1,11 @@
 package com.si.admin_management.dtos.patients;
 
 import com.si.admin_management.entities.Gender;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -23,7 +20,7 @@ public class PatientDtoRequest {
     private String lastName;
 
     @NotNull(message = "Birthdate is required!")
-    private Date birthDate;
+    private LocalDate birthDate;
 
     @NotBlank(message = "PlaceOfBirth is required!")
     private String placeOfBirth;

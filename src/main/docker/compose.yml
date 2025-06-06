@@ -1,5 +1,24 @@
 name: admin-management
 services:
+  admin_management_app:
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+    container_name: admin_management_app
+    environment:
+      DB_HOST: admin_management_db
+      DB_NAME: admin_management_db
+      DB_USERNAME: admin
+      DB_PASSWORD: admin
+      DB_PORT: 3306
+    ports:
+      - "8085:8085"
+    depends_on:
+      admin_management_db:
+        condition: service_healthy
+    restart: unless-stopped
+
+
   admin_management_db:
     image: mysql
     container_name: admin_management_db
@@ -15,6 +34,10 @@ services:
       - admin_management_mysql_data:/var/lib/mysql
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 
   keycloak_database:

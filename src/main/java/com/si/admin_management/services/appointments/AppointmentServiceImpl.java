@@ -4,7 +4,6 @@ import com.si.admin_management.dtos.appointments.AppointmentDtoResponse;
 import com.si.admin_management.dtos.appointments.AppointmentDtoRequest;
 import com.si.admin_management.entities.AppointmentEntity;
 import com.si.admin_management.entities.AppointmentStatus;
-import com.si.admin_management.exception.EntityExistsException;
 import com.si.admin_management.exception.EntityNotFoundException;
 import com.si.admin_management.mappers.AppointmentMapper;
 import com.si.admin_management.repositories.AppointmentRepository;
@@ -18,7 +17,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,8 @@ public class AppointmentServiceImpl implements IAppointmentService{
 
     @Override
     public Optional<AppointmentDtoResponse> saveAppointment(AppointmentDtoRequest appointmentDtoRequest){
-
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String createdBy = jwt.getClaimAsString("preferred_username");
         if (patientService.getPatientById(appointmentDtoRequest.getPatientId()).isEmpty()){
             throw new EntityNotFoundException(messageSource.getMessage("patient.notfound", new Object[]{appointmentDtoRequest.getPatientId()}, Locale.getDefault()));
         }
@@ -49,18 +51,13 @@ public class AppointmentServiceImpl implements IAppointmentService{
         appointment.setAppointmentNum(registrationNumber.generate("RDV" , appointmentRepository.count()));
         appointment.setStatus(AppointmentStatus.SCHEDULED);
         appointment.setCreatedDate(LocalDateTime.now());
+        appointment.setCreatedBy(createdBy);
 
+        logger.info("Appointment : {}", appointment);
 
-
-        var user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        logger.info("User principal : {}" , user);
-//        appointment.setCreatedBy();
-//        logger.info("Appointment : {}", appointment);
-//
-//        AppointmentEntity appointmentEntity = appointmentRepository.save(appointment);
-//        AppointmentDtoResponse appointmentDtoResponse = appointmentMapper.toAppointmentDtoResponse(appointmentEntity);
-//        return Optional.of(appointmentDtoResponse);
-        return null;
+        AppointmentEntity appointmentEntity = appointmentRepository.save(appointment);
+        AppointmentDtoResponse appointmentDtoResponse = appointmentMapper.toAppointmentDtoResponse(appointmentEntity);
+        return Optional.of(appointmentDtoResponse);
     }
 
 

@@ -57,7 +57,7 @@ public class RoleServiceImpl implements IRoleService {
         return kcRoleDto;
     }
 
-    private void createPolicy(String roleName) {
+    void createPolicy(String roleName) {
         RolePolicyRepresentation rolePolicy = new RolePolicyRepresentation();
         rolePolicy.setName(roleName);
         rolePolicy.setDescription("Policy for role"+roleName);
@@ -133,17 +133,6 @@ public class RoleServiceImpl implements IRoleService {
             );
             return ap;
         }).toList();
-
-//        return authorization.policies()
-//                .policies(null, null, null, null, null, true, null, null, null, null)
-//                .stream()
-//                .map(item -> {
-//                    AppPermission ap = new AppPermission();
-//                    ap.setName(item.getName());
-//                    ap.setDescription(item.getDescription());
-//                    return ap;
-//                })
-//                .toList();
     }
 
 
@@ -180,7 +169,7 @@ public class RoleServiceImpl implements IRoleService {
 
     }
 
-    private String getClientUUID () {
+    public String getClientUUID () {
         String clientUUID = "";
         List<ClientRepresentation> clients = keycloakAdmin.realm(realm).clients().findByClientId(clientId);
         if(!clients.isEmpty()) {

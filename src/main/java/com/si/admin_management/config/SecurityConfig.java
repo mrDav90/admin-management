@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .addFilterBefore(rptTokenExchangeFilter, BearerTokenAuthenticationFilter.class)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/swagger/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger/**", "/v3/api-docs/**", "/swagger-ui/**","/h2-console/**").permitAll()
                         .anyRequest()
                         .authenticated()
                 )

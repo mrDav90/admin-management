@@ -23,6 +23,8 @@ spring:
           issuer-uri: ${keycloak.server-url}/realms/${keycloak.realm}
           jwk-set-uri: ${keycloak.server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs
 
+  profiles:
+    active: test
 logging:
   level:
     org:

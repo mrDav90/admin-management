@@ -29,37 +29,36 @@ pipeline {
             }
         }
 
-        // Étape 2 : Build du projet et gestion des dépendances
-        stage('Build') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'mvn clean install'
-                    } else {
-                        bat 'mvn clean install'
-                    }
-                }
-            }
-        }
 
-        // Étape 3 : Exécution des tests unitaires
+        // Étape 2 : Environnement préparation
         stage('Setup Test Environnement') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d'
+                        sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d keycloak_database keycloak'
                         sh 'sleep 30'
-                        sh 'mvn test'
                     } else {
-                        sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d'
+                        sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d keycloak_database keycloak'
                         sh 'sleep 30'
-                        bat 'mvn test'
                     }
                 }
             }
         }
 
-        // Étape 3 : Exécution des tests unitaires
+        // 3- Build
+        stage('Build') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean install -Ptest'
+                    } else {
+                        bat 'mvn clean install -Ptest'
+                    }
+                }
+            }
+        }
+
+        // Étape 4 : Exécution des tests unitaires
         stage('Test') {
             steps {
                 script {
@@ -73,7 +72,7 @@ pipeline {
         }
 
 
-        // Étape 4 : Scan des vulnérabilités des dépendances (OWASP)
+        // Étape 5 : Scan des vulnérabilités des dépendances (OWASP)
         stage('Dependency Check') {
             steps {
                 dependencyCheck additionalArguments: '--scan target/', odcInstallation: 'owasp-dependancy-check'
@@ -81,7 +80,7 @@ pipeline {
             }
         }
 
-        // Étape 5 : Analyse statique avec SonarQube
+        // Étape 6 : Analyse statique avec SonarQube
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {

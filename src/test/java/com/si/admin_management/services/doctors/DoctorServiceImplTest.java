@@ -19,12 +19,14 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+@ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 public class DoctorServiceImplTest {
     @Mock

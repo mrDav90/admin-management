@@ -9,7 +9,6 @@ pipeline {
     environment {
         SONAR_SCANNER_HOME = tool 'SonarQubeScanner'
         SONAR_TOKEN = credentials('sonar-token')
-        DOCKER_COMPOSE_FILE = 'src/main/docker/compose.yml'
     }
 
     stages {
@@ -29,36 +28,20 @@ pipeline {
             }
         }
 
-
-        // Étape 2 : Environnement préparation
-        stage('Setup Test Environnement') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d keycloak_database keycloak'
-                        sh 'sleep 30'
-                    } else {
-                        sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d keycloak_database keycloak'
-                        sh 'sleep 30'
-                    }
-                }
-            }
-        }
-
-        // 3- Build
+        // 2- Build
         stage('Build') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh 'mvn clean install -Ptest'
+                        sh 'mvn clean install "-Dspring-boot.run.profiles=test"'
                     } else {
-                        bat 'mvn clean install -Ptest'
+                        bat 'mvn clean install "-Dspring-boot.run.profiles=test"'
                     }
                 }
             }
         }
 
-        // Étape 4 : Exécution des tests unitaires
+        // Étape 3 : Exécution des tests unitaires
         stage('Test') {
             steps {
                 script {
@@ -72,7 +55,7 @@ pipeline {
         }
 
 
-        // Étape 5 : Scan des vulnérabilités des dépendances (OWASP)
+        // Étape 4 : Scan des vulnérabilités des dépendances (OWASP)
         stage('Dependency Check') {
             steps {
                 dependencyCheck additionalArguments: '--scan target/', odcInstallation: 'owasp-dependancy-check'
@@ -80,7 +63,7 @@ pipeline {
             }
         }
 
-        // Étape 6 : Analyse statique avec SonarQube
+        // Étape 5 : Analyse statique avec SonarQube
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {

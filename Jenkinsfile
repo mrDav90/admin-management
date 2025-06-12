@@ -107,6 +107,13 @@ pipeline {
 
     // Post-actions : Notification en cas d'échec
     post {
+        always {
+            // Publier les résultats
+            junit 'target/surefire-reports/*.xml'
+
+            // Archiver les artifacts
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
         failure {
             emailext (
                 subject: '[URGENT] Échec du Pipeline ${JOB_NAME} - Build #${BUILD_NUMBER}',

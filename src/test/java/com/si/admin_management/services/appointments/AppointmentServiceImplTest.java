@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -163,10 +164,19 @@ public class AppointmentServiceImplTest {
     @Test
     void saveAppointmentOK() {
 
+        String expectedErrorMessage = "Patient non trouvé avec l'ID " + patient.getId();
+
         when(patientService.getPatientById("1")).thenReturn(Optional.of(patientDtoResponse));
         when(doctorService.getDoctorById("1")).thenReturn(Optional.of(doctorDtoResponse));
         when(appointmentMapper.toAppointmentEntity(appointmentDtoRequest)).thenReturn(appointmentEntity);
 
+        when(doctorService.getDoctorById(doctor.getId())).thenReturn(Optional.empty());
+        when(messageSource.getMessage(eq("doctor.notfound"), any(Object[].class), any(Locale.class)))
+                .thenReturn(expectedErrorMessage);
+
+        when(patientService.getPatientById(patient.getId())).thenReturn(Optional.empty());
+        when(messageSource.getMessage(eq("patient.notfound"), any(Object[].class), any(Locale.class)))
+                .thenReturn(expectedErrorMessage);
 
         long currentCount = 0L;
         when(appointmentRepository.count()).thenReturn(currentCount);

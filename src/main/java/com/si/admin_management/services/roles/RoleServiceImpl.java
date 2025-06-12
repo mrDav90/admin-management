@@ -103,16 +103,16 @@ public class RoleServiceImpl implements IRoleService {
         return new PageImpl<>(roles, pagedRequest, totalRoles) ;
     }
 
-    private boolean isKeycloakImplicitRole(String roleName) {
-        List<String> implicitRolePatterns = Arrays.asList(
-                "default-roles",
-                "offline_access",
-                "uma_authorization"
-        );
-
-        return implicitRolePatterns.stream()
-                .anyMatch(pattern -> roleName.startsWith(pattern) || roleName.equals(pattern));
-    }
+//    private boolean isKeycloakImplicitRole(String roleName) {
+//        List<String> implicitRolePatterns = Arrays.asList(
+//                "default-roles",
+//                "offline_access",
+//                "uma_authorization"
+//        );
+//
+//        return implicitRolePatterns.stream()
+//                .anyMatch(pattern -> roleName.startsWith(pattern) || roleName.equals(pattern));
+//    }
 
     public List<AppPermission> getAllPermissions () {
         AuthorizationResource authorization = keycloakAdmin.realm(realm).clients().get(getClientUUID()).authorization();

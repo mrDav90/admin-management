@@ -107,16 +107,6 @@ pipeline {
 
     // Post-actions : Notification en cas d'échec
     post {
-        always {
-            // Nettoyer les conteneurs de test
-            sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} down'
-
-            // Publier les résultats
-            junit 'target/surefire-reports/*.xml'
-
-            // Archiver les artifacts
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-        }
         failure {
             emailext (
                 subject: '[URGENT] Échec du Pipeline ${JOB_NAME} - Build #${BUILD_NUMBER}',

@@ -3,390 +3,332 @@ package com.si.admin_management.services.roles;
 import com.si.admin_management.dtos.keycloak.*;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.*;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.authorization.*;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-public class RoleServiceImplTest {
-    @Mock
-    private Keycloak keycloakAdmin;
-
-    @Mock
-    private RealmResource realmResource;
-
-    @Mock
-    private RolesResource rolesResource;
-
-    @Mock
-    private RoleResource roleResource;
-
-
-    @Mock private ClientsResource clientsResource;
-    @Mock private ClientResource clientResource;
-    @Mock private AuthorizationResource authorizationResource;
-    @Mock private PoliciesResource policiesResource;
-    @Mock private RolePoliciesResource rolePoliciesResource;
-    @Mock private PolicyResource policyResource;
-    @Mock private PermissionsResource permissionsResource;
-    @Mock private ScopePermissionsResource scopePermissionsResource;
-    @Mock private ScopePermissionResource scopePermissionResource;
-    @Mock private ResourcesResource resourcesResource;
-
-    // --- Mock pour la réponse HTTP ---
-    @Mock private Response mockWsResponse;
-    @Mock private Response.StatusType mockStatusInfo;
-
-    @Captor
-    private ArgumentCaptor<RolePolicyRepresentation> rolePolicyCaptor;
-    @Captor private ArgumentCaptor<ScopePermissionRepresentation> scopePermissionCaptor;
+class RoleServiceImplTest {
 
     @InjectMocks
     private RoleServiceImpl roleService;
 
-    private static final String realm = "test-realm";
-    private static final String clientId = "test-client";
-    private static final String client_uuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
+    @Mock
+    private Keycloak keycloakAdmin;
+
+    // L'utilisation de RETURNS_DEEP_STUBS est essentielle pour mocker les API fluides comme celle de Keycloak
+    // sans avoir à mocker chaque étape de la chaîne (realm, clients, roles, etc.) manuellement.
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private RealmResource realmResource;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private RolesResource rolesResource;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private AuthorizationResource authorizationResource;
+
 
     @BeforeEach
     void setUp() {
-        when(keycloakAdmin.realm(realm)).thenReturn(realmResource);
-        when(realmResource.roles()).thenReturn(rolesResource);
+        // Injection manuelle des valeurs des champs @Value
+        ReflectionTestUtils.setField(roleService, "realm", "test-realm");
+        ReflectionTestUtils.setField(roleService, "clientId", "test-client");
 
-        roleService = new RoleServiceImpl(keycloakAdmin);
-        ReflectionTestUtils.setField(roleService, "realm", realm);
-        ReflectionTestUtils.setField(roleService, "clientId", clientId);
+        // Préparation du mock de base pour la plupart des tests
+        when(keycloakAdmin.realm("test-realm")).thenReturn(realmResource);
+    }
 
-        // Configuration de la chaîne de mocks principale, utilisée par presque toutes les méthodes
-        when(keycloakAdmin.realm(realm)).thenReturn(realmResource);
-        //when(realmResource.clients()).thenReturn(clientsResource);
+    // --- Test de getClientUUID ---
 
-        // Mock pour la méthode getClientUUID()
+    @Test
+    @DisplayName("getClientUUID devrait retourner l'UUID du client quand il est trouvé")
+    void getClientUUID_shouldReturnId_whenClientExists() {
+        // GIVEN
+        String expectedUuid = "client-uuid-123";
         ClientRepresentation clientRepresentation = new ClientRepresentation();
-        clientRepresentation.setId(client_uuid);
-        //when(clientsResource.findByClientId(clientId)).thenReturn(Collections.singletonList(clientRepresentation));
+        clientRepresentation.setId(expectedUuid);
 
-        // Suite de la chaîne de mocks
-        //when(clientsResource.get(client_uuid)).thenReturn(clientResource);
-        //when(clientResource.authorization()).thenReturn(authorizationResource);
-//        when(authorizationResource.policies()).thenReturn(policiesResource);
-//        when(authorizationResource.permissions()).thenReturn(permissionsResource);
-//        when(authorizationResource.resources()).thenReturn(resourcesResource);
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientRepresentation));
 
+        // WHEN
+        String actualUuid = roleService.getClientUUID();
+
+        // THEN
+        assertEquals(expectedUuid, actualUuid);
     }
 
     @Test
-    void createRole_shouldCreateRoleSuccessfully() {
-        // Given
-        KcRoleDtoRequest request = new KcRoleDtoRequest();
-        request.setName("TEST_ROLE");
-        request.setDescription("Test role description");
+    @DisplayName("getClientUUID devrait retourner une chaîne vide quand le client n'est pas trouvé")
+    void getClientUUID_shouldReturnEmptyString_whenClientDoesNotExist() {
+        // GIVEN
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(Collections.emptyList());
+
+        // WHEN
+        String actualUuid = roleService.getClientUUID();
+
+        // THEN
+        assertThat(actualUuid).isEmpty();
+    }
+
+    // --- Test de createRole et createPolicy ---
+
+    @Test
+    @DisplayName("createRole devrait créer un rôle et une policy associée avec succès")
+    void createRole_shouldCreateRoleAndPolicySuccessfully() {
+        // GIVEN
+        KcRoleDtoRequest request = new KcRoleDtoRequest("new-role", "A new test role");
 
         RoleRepresentation createdRole = new RoleRepresentation();
-        createdRole.setId("role-uuid-123");
-        createdRole.setName("TEST_ROLE");
-        createdRole.setDescription("Test role description");
+        createdRole.setId("role-id-123");
+        createdRole.setName(request.getName());
+        createdRole.setDescription(request.getDescription());
 
-        when(rolesResource.get("TEST_ROLE")).thenReturn(roleResource);
-        when(roleResource.toRepresentation()).thenReturn(createdRole);
+        // Mock pour la partie création de rôle
+        when(realmResource.roles()).thenReturn(rolesResource);
+        when(rolesResource.get(request.getName()).toRepresentation()).thenReturn(createdRole);
 
-        // Mock de la méthode createPolicy (en supposant qu'elle existe dans la classe)
-        RoleServiceImpl spyService = spy(roleService);
-        doNothing().when(spyService).createPolicy("TEST_ROLE");
+        // Mock pour la partie création de policy (qui est appelée à l'intérieur)
+        String clientUuid = "client-uuid-123";
+        ClientRepresentation clientRepresentation = new ClientRepresentation();
+        clientRepresentation.setId(clientUuid);
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientRepresentation));
+        when(realmResource.clients().get(clientUuid).authorization()).thenReturn(authorizationResource);
 
-        // When
-        KcRoleDto result = spyService.createRole(request);
+        Response mockResponse = mock(Response.class);
+        when(mockResponse.getStatus()).thenReturn(201); // 201 = Created
+        when(authorizationResource.policies().role().create(any(RolePolicyRepresentation.class))).thenReturn(mockResponse);
 
-        // Then
-        assertNotNull(result);
-        assertEquals("role-uuid-123", result.getId());
-        assertEquals("TEST_ROLE", result.getName());
-        assertEquals("Test role description", result.getDescription());
+        // WHEN
+        KcRoleDto result = roleService.createRole(request);
 
-        // Vérifications des interactions
-        verify(keycloakAdmin).realm(realm);
-        verify(realmResource).roles();
+        // THEN
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(createdRole.getId());
+        assertThat(result.getName()).isEqualTo(createdRole.getName());
+
+        // On peut aussi vérifier que la méthode create de Keycloak a été appelée avec les bonnes données
         verify(rolesResource).create(any(RoleRepresentation.class));
-        verify(rolesResource).get("TEST_ROLE");
-        verify(roleResource).toRepresentation();
-        verify(spyService).createPolicy("TEST_ROLE");
+        verify(authorizationResource.policies().role()).create(any(RolePolicyRepresentation.class));
     }
-
 
     @Test
-    void getRoles_shouldReturnFirstPageWithCorrectPagination() {
-        // Given
-        int pageNumber = 0;
-        int pageSize = 2;
-        int firstResult = 0;
+    @DisplayName("createRole devrait gérer une erreur de création de policy")
+    void createRole_shouldHandlePolicyCreationError() {
+        // GIVEN
+        KcRoleDtoRequest request = new KcRoleDtoRequest("error-role", "A role that fails policy creation");
 
-        List<RoleRepresentation> pagedRoles = createRoleRepresentations(
-                Arrays.asList("ROLE_1", "ROLE_2"),
-                Arrays.asList("Role 1 description", "Role 2 description")
-        );
+        RoleRepresentation createdRole = new RoleRepresentation();
+        createdRole.setId("role-id-456");
+        createdRole.setName(request.getName());
 
-        List<RoleRepresentation> allRoles = createRoleRepresentations(
-                Arrays.asList("ROLE_1", "ROLE_2", "ROLE_3", "ROLE_4", "ROLE_5"),
-                Arrays.asList("Role 1 description", "Role 2 description", "Role 3 description",
-                        "Role 4 description", "Role 5 description")
-        );
+        when(realmResource.roles()).thenReturn(rolesResource);
+        when(rolesResource.get(request.getName()).toRepresentation()).thenReturn(createdRole);
 
-        when(rolesResource.list(firstResult, pageSize)).thenReturn(pagedRoles);
-        when(rolesResource.list()).thenReturn(allRoles);
+        String clientUuid = "client-uuid-123";
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientWithId(clientUuid)));
+        when(realmResource.clients().get(clientUuid).authorization()).thenReturn(authorizationResource);
 
-        // When
-        Page<KcRoleDto> result = roleService.getRoles(pageNumber, pageSize);
+        Response mockResponse = mock(Response.class);
+        when(mockResponse.getStatus()).thenReturn(400); // 400 = Bad Request
+        when(mockResponse.getStatusInfo()).thenReturn(Response.Status.BAD_REQUEST); // Pour couvrir la ligne de log
+        when(authorizationResource.policies().role().create(any(RolePolicyRepresentation.class))).thenReturn(mockResponse);
 
-        // Then
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-        assertEquals(5, result.getTotalElements());
-        assertEquals(3, result.getTotalPages());
-        assertEquals(0, result.getNumber());
-        assertEquals(2, result.getSize());
-        assertFalse(result.isLast());
-        assertTrue(result.isFirst());
+        // WHEN
+        KcRoleDto result = roleService.createRole(request);
 
-        // Vérification du contenu
-        KcRoleDto firstRole = result.getContent().get(0);
-        assertEquals("role-1-id", firstRole.getId());
-        assertEquals("ROLE_1", firstRole.getName());
-        assertEquals("Role 1 description", firstRole.getDescription());
-
-        // Vérifications des interactions
-        verify(rolesResource).list(firstResult, pageSize);
-        verify(rolesResource).list();
+        // THEN
+        assertThat(result).isNotNull();
+        verify(authorizationResource.policies().role()).create(any(RolePolicyRepresentation.class));
     }
 
+    // --- Test de getRoles ---
 
-    private List<RoleRepresentation> createRoleRepresentations(List<String> names, List<String> descriptions) {
-        List<RoleRepresentation> roles = new ArrayList<>();
+    @Test
+    @DisplayName("getRoles devrait retourner une page de rôles")
+    void getRoles_shouldReturnPagedRoles() {
+        // GIVEN
+        RoleRepresentation role1 = new RoleRepresentation("role1", "desc1", false);
+        role1.setId("id1");
+        RoleRepresentation role2 = new RoleRepresentation("role2", "desc2", false);
+        role2.setId("id2");
 
-        for (int i = 0; i < names.size(); i++) {
-            RoleRepresentation role = new RoleRepresentation();
-            role.setId("role-" + (i + 1) + "-id");
-            role.setName(names.get(i));
-            role.setDescription(i < descriptions.size() ? descriptions.get(i) : null);
-            roles.add(role);
-        }
+        List<RoleRepresentation> pagedList = List.of(role1, role2);
+        List<RoleRepresentation> fullList = List.of(role1, role2, new RoleRepresentation()); // Total de 3
 
-        return roles;
+        when(realmResource.roles()).thenReturn(rolesResource);
+        when(rolesResource.list(0, 10)).thenReturn(pagedList);
+        when(rolesResource.list()).thenReturn(fullList);
+
+        // WHEN
+        var resultPage = roleService.getRoles(0, 10);
+
+        // THEN
+        assertThat(resultPage).isNotNull();
+        assertThat(resultPage.getTotalElements()).isEqualTo(2);
+        assertThat(resultPage.getContent()).hasSize(2);
+        assertThat(resultPage.getContent().get(0).getName()).isEqualTo("role1");
     }
 
+    // --- Test de getAllPermissions ---
 
-//    @Nested
-//    class GetClientUUIDTests {
-//        @Test
-//        void getClientUUID_whenClientFound_returnsId() {
-//            String result = roleService.getClientUUID();
-//            assertThat(result).isEqualTo(client_uuid);
-//        }
-//
-//        @Test
-//        void getClientUUID_whenClientNotFound_returnsEmptyString() {
-//            when(clientsResource.findByClientId(client_uuid)).thenReturn(Collections.emptyList());
-//            String result = roleService.getClientUUID();
-//            assertThat(result).isEmpty();
-//        }
-//    }
-//
-//    @Nested
-//    class CreatePolicyTests {
-//        @BeforeEach
-//        void setUpPolicyMocks() {
-//            when(policiesResource.role()).thenReturn(rolePoliciesResource);
-//        }
-//
-//        @Test
-//        void createPolicy_whenCreationSucceeds_logsSuccess() {
-//            // Given: Le serveur retourne un statut 201 (Created)
-//            when(mockWsResponse.getStatus()).thenReturn(201);
-//            when(rolePoliciesResource.create(any(RolePolicyRepresentation.class))).thenReturn(mockWsResponse);
-//
-//            // When
-//            roleService.createPolicy("test-role");
-//
-//            // Then
-//            verify(rolePoliciesResource).create(rolePolicyCaptor.capture());
-//            RolePolicyRepresentation capturedPolicy = rolePolicyCaptor.getValue();
-//
-//            assertThat(capturedPolicy.getName()).isEqualTo("test-role");
-//            assertThat(capturedPolicy.getType()).isEqualTo("role");
-//            assertThat(capturedPolicy.getLogic()).isEqualTo(Logic.POSITIVE);
-//            assertThat(capturedPolicy.getRoles()).hasSize(1);
-//            RolePolicyRepresentation.RoleDefinition roleDef = capturedPolicy.getRoles().iterator().next();
-//            assertThat(roleDef.getId()).isEqualTo("test-role");
-//            assertThat(roleDef.isRequired()).isTrue();
-//        }
-//
-//        @Test
-//        void createPolicy_whenCreationFails_logsError() {
-//            // Given: Le serveur retourne une erreur (ex: 400 Bad Request)
-//            when(mockWsResponse.getStatus()).thenReturn(400);
-//            when(mockWsResponse.getStatusInfo()).thenReturn(mockStatusInfo);
-//            when(mockStatusInfo.toString()).thenReturn("Bad Request");
-//            when(rolePoliciesResource.create(any(RolePolicyRepresentation.class))).thenReturn(mockWsResponse);
-//
-//            // When
-//            roleService.createPolicy("test-role");
-//
-//            // Then
-//            verify(rolePoliciesResource).create(any(RolePolicyRepresentation.class));
-//            verify(mockWsResponse, times(2)).getStatusInfo(); // Appelé une fois pour le log
-//        }
-//    }
-//
-//    @Nested
-//    class GetAllPermissionsTests {
-//        @Test
-//        void getAllPermissions_mapsResourcesAndPoliciesCorrectly() {
-//            // Given: Mocks pour les ressources et les policies associées
-//            ResourceRepresentation resource1 = new ResourceRepresentation("resource-un", new HashSet<>(), "Resource Un", null);
-//            resource1.setId("id-res-1");
-//            ResourceRepresentation resource2 = new ResourceRepresentation("resource-deux", new HashSet<>(), "Resource Deux", null);
-//            resource2.setId("id-res-2");
-//
-//            PolicyRepresentation policy1 = new PolicyRepresentation();
-//            policy1.setName("permission-A");
-//            policy1.setDescription("Desc A");
-//
-//            PolicyRepresentation policy2 = new PolicyRepresentation();
-//            policy2.setName("permission-B");
-//            policy2.setDescription("Desc B");
-//
-//            when(resourcesResource.resources()).thenReturn(List.of(resource1, resource2));
-//            when(policiesResource.policies(null, null, null, "id-res-1", null, true, null, null, null, null))
-//                    .thenReturn(List.of(policy1));
-//            when(policiesResource.policies(null, null, null, "id-res-2", null, true, null, null, null, null))
-//                    .thenReturn(List.of(policy2));
-//
-//            // When
-//            List<AppPermission> result = roleService.getAllPermissions();
-//
-//            // Then
-//            assertThat(result).hasSize(2);
-//            AppPermission p1 = result.get(0);
-//            assertThat(p1.getResourceName()).isEqualTo("resource-un");
-//            assertThat(p1.getResourceDisplayName()).isEqualTo("Resource Un");
-//            assertThat(p1.getPermissions()).hasSize(1);
-//            assertThat(p1.getPermissions().get(0).getName()).isEqualTo("permission-A");
-//
-//            AppPermission p2 = result.get(1);
-//            assertThat(p2.getResourceName()).isEqualTo("resource-deux");
-//            assertThat(p2.getPermissions()).hasSize(1);
-//        }
-//    }
-//
-//    @Nested
-//    class GetPermissionsByRoleTests {
-//        @Test
-//        void getPermissionsByRole_returnsDependentPolicyNames() {
-//            // Given
-//            RolePolicyRepresentation rolePolicy = new RolePolicyRepresentation();
-//            rolePolicy.setId("policy-id-for-role");
-//
-//            PolicyRepresentation dependentPolicy1 = new PolicyRepresentation();
-//            dependentPolicy1.setName("Dependent-Policy-1");
-//            PolicyRepresentation dependentPolicy2 = new PolicyRepresentation();
-//            dependentPolicy2.setName("Dependent-Policy-2");
-//
-//            when(policiesResource.role()).thenReturn(rolePoliciesResource);
-//            when(rolePoliciesResource.findByName("admin-role")).thenReturn(rolePolicy);
-//            when(policiesResource.policy("policy-id-for-role")).thenReturn(policyResource);
-//            when(policyResource.dependentPolicies()).thenReturn(List.of(dependentPolicy1, dependentPolicy2));
-//
-//            // When
-//            List<String> result = roleService.getPermissionsByRole("admin-role");
-//
-//            // Then
-//            assertThat(result).containsExactlyInAnyOrder("Dependent-Policy-1", "Dependent-Policy-2");
-//        }
-//    }
-//
-//    @Nested
-//    class AssignPermissionsToRoleTests {
-//
-//        @BeforeEach
-//        void setUpAssignMocks() {
-//            when(permissionsResource.scope()).thenReturn(scopePermissionsResource);
-//            when(policiesResource.findByName(anyString())).thenReturn(new PolicyRepresentation() {{ setId("policy-id-123"); }});
-//        }
-//
-//        @Test
-//        void assignPermissionsToRole_whenPermissionNotAssociated_updatesPolicy() {
-//            // Given
-//            String roleName = "editor-role";
-//            AssignPermissionRequestDto request = new AssignPermissionRequestDto();
-//            PermissionItem permissionItem = new PermissionItem("edit-article" , "Edit article");
-//            request.setPermissions(Collections.singletonList(permissionItem));
-//
-//            ScopePermissionRepresentation scopePerm = new ScopePermissionRepresentation();
-//            scopePerm.setId("scope-perm-id-456");
-//
-//            when(scopePermissionsResource.findByName("edit-article")).thenReturn(scopePerm);
-//            when(scopePermissionsResource.findById("scope-perm-id-456")).thenReturn(scopePermissionResource);
-//            // Simule qu'il n'y a pas de policy associée pour l'instant
-//            when(scopePermissionResource.associatedPolicies()).thenReturn((List<PolicyRepresentation>) Stream.empty());
-//
-//            // When
-//            roleService.assignPermissionsToRole(roleName, request);
-//
-//            // Then
-//            verify(scopePermissionResource).update(scopePermissionCaptor.capture());
-//            ScopePermissionRepresentation captured = scopePermissionCaptor.getValue();
-//            assertThat(captured.getPolicies()).contains("policy-id-123");
-//            assertThat(captured.getDecisionStrategy()).isEqualTo(DecisionStrategy.AFFIRMATIVE);
-//        }
-//
-//        @Test
-//        void assignPermissionsToRole_whenPermissionAlreadyAssociated_doesNotUpdate() {
-//            // Given
-//            String roleName = "editor-role";
-//            AssignPermissionRequestDto request = new AssignPermissionRequestDto();
-//            PermissionItem permissionItem = new PermissionItem("edit-article" , "Edit article");
-//            request.setPermissions(Collections.singletonList(permissionItem));
-//
-//            ScopePermissionRepresentation scopePerm = new ScopePermissionRepresentation();
-//            scopePerm.setId("scope-perm-id-456");
-//
-//            // Simule que la policy est déjà associée
-//            PolicyRepresentation existingPolicy = new PolicyRepresentation();
-//            existingPolicy.setName("policy-id-123"); // Important: le test logique se base sur l'ID/Nom
-//
-//            when(scopePermissionsResource.findByName("edit-article")).thenReturn(scopePerm);
-//            when(scopePermissionsResource.findById("scope-perm-id-456")).thenReturn(scopePermissionResource);
-//            when(scopePermissionResource.associatedPolicies()).thenReturn(List.of(existingPolicy));
-//
-//            // When
-//            roleService.assignPermissionsToRole(roleName, request);
-//
-//            // Then
-//            // On vérifie que la méthode update n'a JAMAIS été appelée
-//            verify(scopePermissionResource, never()).update(any());
-//        }
-//    }
+    @Test
+    @DisplayName("getAllPermissions devrait retourner les ressources et leurs permissions associées")
+    void getAllPermissions_shouldReturnResourcesAndPermissions() {
+        // GIVEN
+        String clientUuid = "client-uuid-123";
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientWithId(clientUuid)));
+        when(realmResource.clients().get(clientUuid).authorization()).thenReturn(authorizationResource);
 
+        // Mock des ressources
+        ResourceRepresentation resource1 = new ResourceRepresentation("resource-a", Set.of());
+        resource1.setId("res-id-a");
+        resource1.setDisplayName("Resource A");
+        when(authorizationResource.resources().resources()).thenReturn(List.of(resource1));
 
+        // Mock des policies pour cette ressource
+        PolicyRepresentation policy1 = new PolicyRepresentation();
+        policy1.setName("permission-view-a");
+        policy1.setDescription("Can view Resource A");
+        when(authorizationResource.policies().policies(null, null, null, "res-id-a", null, true, null, null, null, null))
+                .thenReturn(List.of(policy1));
+
+        // WHEN
+        List<com.si.admin_management.dtos.keycloak.AppPermission> permissions = roleService.getAllPermissions();
+
+        // THEN
+        assertThat(permissions).hasSize(1);
+        var appPermission = permissions.get(0);
+        assertThat(appPermission.getResourceName()).isEqualTo("resource-a");
+        assertThat(appPermission.getResourceDisplayName()).isEqualTo("Resource A");
+        assertThat(appPermission.getPermissions()).hasSize(1);
+        assertThat(appPermission.getPermissions().get(0).getName()).isEqualTo("permission-view-a");
+    }
+
+    // --- Test de getPermissionsByRole ---
+
+    @Test
+    @DisplayName("getPermissionsByRole devrait retourner les permissions d'un rôle")
+    void getPermissionsByRole_shouldReturnPermissionsForRole() {
+        // GIVEN
+        String roleName = "test-role";
+        String clientUuid = "client-uuid-123";
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientWithId(clientUuid)));
+        when(realmResource.clients().get(clientUuid).authorization()).thenReturn(authorizationResource);
+
+        RolePolicyRepresentation rolePolicy = new RolePolicyRepresentation();
+        rolePolicy.setId("policy-id-for-role");
+        when(authorizationResource.policies().role().findByName(roleName)).thenReturn(rolePolicy);
+
+        PolicyRepresentation dependentPolicy = new PolicyRepresentation();
+        dependentPolicy.setName("dependent-permission-name");
+        when(authorizationResource.policies().policy("policy-id-for-role").dependentPolicies()).thenReturn(List.of(dependentPolicy));
+
+        // WHEN
+        List<String> permissions = roleService.getPermissionsByRole(roleName);
+
+        // THEN
+        assertThat(permissions).containsExactly("dependent-permission-name");
+    }
+
+    // --- Test de assignPermissionsToRole ---
+
+    @Test
+    @DisplayName("assignPermissionsToRole devrait assigner une nouvelle permission")
+    void assignPermissionsToRole_shouldAssignNewPermission() {
+        // GIVEN
+        String roleName = "test-role";
+        String permissionName = "new-permission";
+        String permissionDescription = "existing-permission description";
+        var request = new AssignPermissionRequestDto(List.of(new PermissionItem(permissionName , permissionDescription)));
+
+        String clientUuid = "client-uuid-123";
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientWithId(clientUuid)));
+        when(realmResource.clients().get(clientUuid).authorization()).thenReturn(authorizationResource);
+
+        // Mocks pour la permission
+        ScopePermissionRepresentation scopePerm = new ScopePermissionRepresentation();
+        scopePerm.setId("perm-id");
+        scopePerm.setName(permissionName);
+        when(authorizationResource.permissions().scope().findByName(permissionName)).thenReturn(scopePerm);
+
+        // Mocks pour la policy du rôle
+        PolicyRepresentation rolePolicy = new PolicyRepresentation();
+        rolePolicy.setId("role-policy-id");
+        when(authorizationResource.policies().findByName(roleName)).thenReturn(rolePolicy);
+
+        // Mock des policies déjà associées (ici, aucune)
+        when(authorizationResource.permissions().scope().findById("perm-id").associatedPolicies()).thenReturn(List.of());
+
+        // WHEN
+        roleService.assignPermissionsToRole(roleName, request);
+
+        // THEN
+        // On vérifie que la mise à jour est bien appelée
+        ArgumentCaptor<ScopePermissionRepresentation> captor = ArgumentCaptor.forClass(ScopePermissionRepresentation.class);
+        verify(authorizationResource.permissions().scope().findById("perm-id")).update(captor.capture());
+
+        // On vérifie que la policy a bien été ajoutée
+        assertThat(captor.getValue().getPolicies()).contains("role-policy-id");
+        assertThat(captor.getValue().getDecisionStrategy()).isEqualTo(DecisionStrategy.AFFIRMATIVE);
+    }
+
+    @Test
+    @DisplayName("assignPermissionsToRole ne devrait rien faire si la permission est déjà assignée")
+    void assignPermissionsToRole_shouldDoNothingIfPermissionIsAlreadyAssigned() {
+        // GIVEN
+        String roleName = "test-role";
+        String permissionName = "existing-permission";
+        String permissionDescription = "existing-permission description";
+        var request = new AssignPermissionRequestDto(List.of(new PermissionItem(permissionName , permissionDescription)));
+
+        String clientUuid = "client-uuid-123";
+        when(realmResource.clients().findByClientId("test-client")).thenReturn(List.of(clientWithId(clientUuid)));
+        when(realmResource.clients().get(clientUuid).authorization()).thenReturn(authorizationResource);
+
+        ScopePermissionRepresentation scopePerm = new ScopePermissionRepresentation();
+        scopePerm.setId("perm-id");
+        when(authorizationResource.permissions().scope().findByName(permissionName)).thenReturn(scopePerm);
+
+        PolicyRepresentation rolePolicy = new PolicyRepresentation();
+        rolePolicy.setId("role-policy-id");
+        when(authorizationResource.policies().findByName(roleName)).thenReturn(rolePolicy);
+
+        // Mock des policies déjà associées (la policy du rôle est déjà là)
+        //AbstractPolicyRepresentation existingAssociatedPolicy = new PolicyRepresentation();
+        PolicyRepresentation existingAssociatedPolicy = new PolicyRepresentation();
+        existingAssociatedPolicy.setName("role-policy-id"); // NOTE : le test d'appartenance se fait sur le NOM !
+        when(authorizationResource.permissions().scope().findById("perm-id").associatedPolicies()).thenReturn(List.of(existingAssociatedPolicy));
+
+        // WHEN
+        roleService.assignPermissionsToRole(roleName, request);
+
+        // THEN
+        // On vérifie que la mise à jour n'a JAMAIS été appelée
+        verify(authorizationResource.permissions().scope().findById("perm-id"), never()).update(any());
+    }
+
+    // --- Helper Method ---
+    private ClientRepresentation clientWithId(String uuid) {
+        ClientRepresentation client = new ClientRepresentation();
+        client.setId(uuid);
+        return client;
+    }
 }

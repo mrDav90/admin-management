@@ -6,7 +6,7 @@ keycloak:
   server-url: http://localhost:9080
   realm: admin-management-system
   client-id: admin-management-client
-  client-secret: MD6oJLRRGVbpxDEKB2kolNkXvkChrrvn
+  client-secret: ${CLIENT_SECRET}
 
 server:
   port: 8085

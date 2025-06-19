@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.keycloak.representations.idm.authorization.AuthorizationResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -14,6 +16,7 @@ import java.io.IOException;
 
 @Component
 public class RptTokenExchangeFilter extends OncePerRequestFilter {
+    private final Logger logger = LoggerFactory.getLogger(RptTokenExchangeFilter.class);
     private final KcAuthzInitConfig authzConfig;
 
 
@@ -57,6 +60,9 @@ public class RptTokenExchangeFilter extends OncePerRequestFilter {
 
     private String getRptToken(String accessToken) {
         AuthorizationResponse response = authzConfig.authzClient().authorization(accessToken).authorize();
+        logger.info(response.getError());
+        logger.info(response.getErrorDescription());
+        logger.info("rpt work");
         return response.getToken();
     }
 }

@@ -91,10 +91,11 @@ public class UserServiceImpl implements IUserService {
             kcUserDto.setLastName(user.getLastName());
             kcUserDto.setEmail(user.getEmail());
             kcUserDto.setEnabled(user.isEnabled());
-//            keycloakAdmin.realm(realm).roles().list().stream().forEach(role -> {
-//
-//            });
-            //kcUserDto.setRealmRoles(user.getRealmRoles().stream().toList());
+
+            List<RoleRepresentation> userRoles  = keycloakAdmin.realm(realm).users().get(user.getId()).roles().realmLevel().listEffective();
+            List<String> roleNames = userRoles.stream().map(RoleRepresentation::getName).toList();
+
+            kcUserDto.setRealmRoles(roleNames);
             return kcUserDto;
         }).toList() ;
         long totalUsers = keycloakAdmin.realm(realm).users().count();
@@ -131,11 +132,17 @@ public class UserServiceImpl implements IUserService {
                 .orElse(Collections.emptyList());
 
 
+        List<RoleRepresentation> userRoles  = keycloakAdmin.realm(realm).users().get(jwt.getClaimAsString("sub")).roles().realmLevel().listEffective();
+        List<String> roleNames = userRoles.stream().map(RoleRepresentation::getName).toList();
+        Optional<String> roleOptional = roleNames.stream().filter(roleName -> roleName.startsWith("app_")).findFirst();
+        String role = roleOptional.orElse("");
+
         UserInfos userInfos = new UserInfos();
         userInfos.setUsername(jwt.getClaimAsString("preferred_username"));
         userInfos.setEmail(jwt.getClaimAsString("email"));
         userInfos.setFirstName(jwt.getClaimAsString("given_name"));
         userInfos.setLastName(jwt.getClaimAsString("family_name"));
+        userInfos.setRole(role);
         userInfos.setPermissions(permissions);
 
         return userInfos;

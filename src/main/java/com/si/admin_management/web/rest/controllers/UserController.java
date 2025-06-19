@@ -23,9 +23,12 @@ public class UserController {
     private final IUserService userService;
 
     @GetMapping
-    //@PreAuthorize("hasRole('admin')")
+    //@PreAuthorize("hasRole('app_admin')")
     @PreAuthorize("hasAuthority('PERMISSION_account:read')")
-    public ResponseEntity<Page<KcUserDto>> getUsers(@RequestParam(defaultValue = "0") int pageNumber, @RequestParam(defaultValue = "10") int pageSize){
+    public ResponseEntity<Page<KcUserDto>> getUsers(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ){
         Page<KcUserDto> users = userService.getUsers(pageNumber,pageSize);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }

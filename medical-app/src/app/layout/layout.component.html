@@ -1,0 +1,7 @@
+<nz-layout class="app-layout" >
+    <app-sidebar [isCollapsed]="isCollapsed" ></app-sidebar>
+    <nz-layout>
+        <app-header [isCollapsed]="isCollapsed"(_onToggle)="onToggle()"  ></app-header>
+        <app-content [isCollapsed]="isCollapsed"></app-content>
+    </nz-layout>
+</nz-layout>

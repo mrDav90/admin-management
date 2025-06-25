@@ -1,0 +1,46 @@
+<nz-affix [nzOffsetTop]="offsetTop">
+  <nz-header class="app-header-container">
+    <div
+      class="app-header"
+      [style]="{
+        marginLeft: isCollapsed ? '80px' : '20vw',
+        width: isCollapsed ? 'calc(100% - 80px)' : 'calc(100vw - 20vw)',
+        transition: 'all 0.2s'
+      }"
+    >
+      <span class="header-trigger" (click)="onToggle()">
+        <nz-icon
+          class="trigger"
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+        />
+      </span>
+
+      <div>
+        <button
+          nz-button
+          [nzType]="'text'"
+          nz-dropdown
+          nzTrigger="click"
+          [nzDropdownMenu]="menu"
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: start"
+          >
+            <nz-avatar nzIcon="user"> </nz-avatar>
+            <div>
+              <div>
+                <span>{{ userInfos?.firstName }} {{ userInfos?.lastName }} </span>
+              </div>
+              <nz-tag nzColor="blue">{{ userInfos?.role }}</nz-tag>
+            </div>
+          </div>
+        </button>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item (click)="logout()">Déconnexion</li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </div>
+  </nz-header>
+</nz-affix>

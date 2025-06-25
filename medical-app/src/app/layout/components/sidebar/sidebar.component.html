@@ -1,0 +1,27 @@
+<nz-sider
+  class="menu-sidebar"
+  nzCollapsible
+  nzWidth="20vw"
+  nzTheme="light"
+  nzBreakpoint="lg"
+  [(nzCollapsed)]="isCollapsed"
+  [nzTrigger]="null"
+>
+  <div class="sidebar-logo">
+    <a href="#">
+      <h3>MEDKIT</h3>
+    </a>
+  </div>
+  <div class="menu-sidebar-content">
+    <ul
+      nz-menu
+      nzMode="inline"
+      [nzInlineCollapsed]="isCollapsed"
+      [style]="{ border: 'none' }"
+    >
+      @for (item of menuItems; track $index) {
+        <app-menu-item [item]="item"></app-menu-item>
+      }
+    </ul>
+  </div>
+</nz-sider>

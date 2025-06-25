@@ -1,0 +1,34 @@
+# Angular specific
+/dist/
+/out-tsc/
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+
+#Cache
+
+/.angular
+
+# IDEs and editors
+/.idea/
+/.vscode/
+/*.sublime-workspace
+*.sublime-project
+
+# Compiled output
+!*.js
+*.d.ts
+*.map
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*.local
+
+# Misc
+coverage/
+tmp/
+temp/

@@ -1,0 +1,35 @@
+.header-trigger {
+  margin-left: 20px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s, padding 0s;
+}
+
+/* .trigger:hover {
+  color: #1890ff;
+} */
+
+.app-header-container{
+  height: 56px;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+}
+
+.app-header {
+  /* margin-left: 20vw;
+  width: 80vw; */
+  /* position: fixed; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* top: 0;p
+  right: 0; */
+  height: 56px;
+  padding: 0px 8px;
+  background: rgba(255,255,255, 0.5);
+  backdrop-filter: blur(10px);
+  border-bottom: solid rgba(172, 172, 172, 0.2) 1px;
+  
+  /* box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08); */
+}

@@ -1,0 +1,124 @@
+<nz-flex nzAlign="center" nzJustify="space-between">
+  <h1>Liste des patients</h1>
+  <div style="display: flex; align-items: center; gap: 10px">
+    <app-search-bar></app-search-bar>
+    <app-reload-button (_onRefresh)="onRefresh()"></app-reload-button>
+    @if (can(SCOPES.CREATE, RESOURCES.PATIENT)) {
+      <button nz-button [nzType]="'primary'" (click)="onAdd()">
+        <span>Ajouter</span>
+      </button>
+    }
+  </div>
+</nz-flex>
+<br />
+<nz-modal
+  [(nzVisible)]="open"
+  nzTitle="{{ currentRecord ? 'Modifier' : 'Ajouter' }} un patient"
+  (nzOnCancel)="handleCancel()"
+  [nzFooter]="null"
+  nzWidth="70%"
+  [nzStyle]="{ top: '30px' }"
+  [nzBodyStyle]="{ overflow: 'auto', maxHeight: 'calc(100vh - 120px)' }"
+>
+  <ng-container *nzModalContent>
+    <app-add-patient
+      [currentRecord]="currentRecord"
+      (_onClose)="handleCancel()"
+      (_onRefresh)="onRefresh()"
+    ></app-add-patient>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="open1"
+  nzTitle="{{ aptRecord ? 'Modifier' : 'Créer' }} un rendez-vous"
+  (nzOnCancel)="handleCancel1()"
+  [nzFooter]="null"
+  nzWidth="50%"
+  [nzStyle]="{ top: '30px' }"
+  [nzBodyStyle]="{ overflow: 'auto', maxHeight: 'calc(100vh - 120px)' }"
+>
+  <ng-container *nzModalContent>
+    <app-add-appointment 
+      [currentRecord]="aptRecord"
+      (_onClose)="handleCancel1()"
+      (_onRefresh)="onRefresh()"
+      [patientId]="patientId"
+    ></app-add-appointment>
+  </ng-container>
+</nz-modal>
+
+<nz-table
+  #basicTable
+  nzSize="small"
+  [nzData]="listPatients"
+  [nzLoading]="loading"
+  [nzTotal]="totalElements"
+  [nzPageSize]="pageSize"
+  [nzPageIndex]="pageNumber"
+  [nzShowSizeChanger]="true"
+  [nzShowPagination]="true"
+  (nzPageIndexChange)="onPageChange($event)"
+  (nzPageSizeChange)="onPageSizeChange($event)"
+  [nzFrontPagination]="false"
+  [nzShowTotal]="rangeTemplate"
+>
+  <thead>
+    <tr>
+      
+      <th>N°</th>
+      <th>Prénoms</th>
+      <th>Nom</th>
+      <th>Genre</th>
+      <th>Téléphone</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (data of basicTable.data; track data.id) {
+    <tr>
+      <td>{{ data.registrationNumber }}</td>
+      <td>{{ data.firstName }}</td>
+      <td>{{ data.lastName }}</td>
+      <td>{{ data.gender }}</td>
+      <td>{{ data.phoneNumber }}</td>
+      <td>
+        @if (can(SCOPES.CREATE, RESOURCES.APPOINTMENT)) {
+        <button
+          nz-button
+          [nzType]="'text'"
+          style="color: #2980b9"
+          (click)="onCreateAppointment(data.id)"
+        >
+          <nz-icon nzType="clock-circle" nzTheme="outline" />
+        </button>
+        }
+        @if (can(SCOPES.UPDATE, RESOURCES.PATIENT)) {
+        <button
+          nz-button
+          [nzType]="'text'"
+          style="color: var(--primary-color)"
+          (click)="onUpdate(data)"
+        >
+          <nz-icon nzType="edit" />
+        </button>
+        } &nbsp; @if (can(SCOPES.DELETE, RESOURCES.PATIENT)) {
+        <button
+          nz-button
+          [nzType]="'text'"
+          style="color: red"
+          (click)="onDelete(data.id)"
+        >
+          <nz-icon nzType="delete" />
+        </button>
+        }
+      </td>
+    </tr>
+    }
+  </tbody>
+</nz-table>
+
+<ng-template #totalTemplate let-total>Total {{ total }} éléments</ng-template>
+<ng-template #rangeTemplate let-range="range" let-total>
+  {{ range[0] }}-{{ range[1] }} sur {{ total }} éléments
+</ng-template>

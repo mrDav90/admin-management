@@ -1,0 +1,29 @@
+<nz-flex nzAlign="center" nzJustify="space-between">
+  <h1>Tableau de bord</h1>
+  <p style="font-size: 18px">Apercu des statistiques</p>
+</nz-flex>
+<div nz-row [nzGutter]="24">
+  <div nz-col [nzSpan]="6">
+    <nz-card nzSize="small" nzSize="small" nzTitle="Total Patients">
+      <p>0</p>
+    </nz-card>
+  </div>
+  <div nz-col [nzSpan]="6">
+    <nz-card nzSize="small" nzTitle="Total RV">
+      <p>0</p>
+    </nz-card>
+  </div>
+  <div nz-col [nzSpan]="6">
+    <nz-card nzSize="small" nzTitle="Total Revenus">
+      <p>
+        {{ 0 | currency : "XOF" : "symbol" : "1.0-0" }}
+      </p>
+    </nz-card>
+  </div>
+  <div nz-col [nzSpan]="6">
+    <nz-card nzSize="small" nzTitle="Total Staff">
+      <p>0</p>
+    </nz-card>
+  </div>
+</div>
+<br />

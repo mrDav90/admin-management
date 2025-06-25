@@ -1,0 +1,76 @@
+<form
+  nz-form
+  nzLayout="vertical"
+  [formGroup]="addAppointmentForm"
+  (ngSubmit)="submitForm()"
+>
+  <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24 }">
+    <div nz-col nzSpan="12">
+      <nz-form-item>
+        <nz-form-label nzFor="doctorId" nzRequired>
+          <span>Médecin</span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+          <nz-select id="doctorId" formControlName="doctorId" nzAllowClear>
+            @for (item of listDoctors; track $index) {
+            <nz-option
+              [nzValue]="item.id"
+              [nzLabel]="item.firstName + ' ' + item.lastName"
+            ></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col nzSpan="12">
+      <nz-form-item>
+        <nz-form-label nzFor="appointmentDate" nzRequired>
+          <span>Date RV </span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+          <nz-date-picker
+            id="appointmentDate"
+            formControlName="appointmentDate"
+            nzShowTime="true"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24 }">
+    <div nz-col nzSpan="24">
+      <nz-form-item>
+        <nz-form-label nzFor="reason">
+          <span>Motif</span>
+        </nz-form-label>
+        <nz-form-control>
+          <textarea
+            nz-input
+            placeholder="Entrer le motif"
+            id="reason"
+            formControlName="reason"
+            style="width: 100%"
+          >
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <nz-flex nzAlign="center" nzJustify="center">
+    <nz-space>
+      <button nz-button nzType="primary" [nzGhost]="true" (click)="onClose()">
+        Annuler
+      </button>
+      &nbsp;&nbsp;
+      <nz-form-item nz-row class="register-area">
+        <nz-form-control>
+          <button nz-button nzType="primary" [nzLoading]="loading">
+            Enregistrer
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-space>
+  </nz-flex>
+</form>

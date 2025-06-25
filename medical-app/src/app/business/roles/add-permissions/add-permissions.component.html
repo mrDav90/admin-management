@@ -1,0 +1,54 @@
+<nz-table
+  #basicTable
+  nzSize="small"
+  [nzData]="permissions"
+  [nzLoading]="loading"
+  [nzShowSizeChanger]="true"
+  [nzShowPagination]="true"
+  [nzFrontPagination]="false"
+>
+  <thead>
+    <tr>
+      <th>Clé Ressource</th>
+      <th>Nom Resource</th>
+      <th>Permissions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (data of basicTable.data; track data.resourceName) {
+    <tr>
+      <td>{{ data.resourceName }}</td>
+      <td>
+        {{ data.resourceDisplayName }}
+      </td>
+      <td>
+        <nz-list nzSize="small">
+          @for (item1 of data.permissions; track $index) {
+          <nz-list-item>
+            <label
+              nz-checkbox
+              [nzValue]="item1.name"
+              [nzChecked]="item1?.checked"
+              (nzCheckedChange)="onChange($event, item1)"
+            >
+              <span>{{ item1.name }}</span> <br />
+              <span style="color: gray">{{ item1.description }}</span>
+            </label>
+          </nz-list-item>
+
+          }
+        </nz-list>
+      </td>
+    </tr>
+    }
+  </tbody>
+</nz-table>
+
+
+<div style="display: flex; justify-content: center; align-items: center">
+  <button nz-button [nzType]="'default'" (click)="onClose()">Annuler</button>
+  &nbsp;&nbsp;
+  <button nz-button [nzType]="'primary'" [nzLoading]="formLoading" (click)="savePermissions()">
+    Enregistrer
+  </button>
+</div>

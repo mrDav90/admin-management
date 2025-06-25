@@ -1,22 +1,22 @@
 name: admin-management
 services:
-  admin_management_app:
-    build:
-      context: ../../..
-      dockerfile: Dockerfile
-    container_name: admin_management_app
-    environment:
-      DB_HOST: admin_management_db
-      DB_NAME: admin_management_db
-      DB_USERNAME: admin
-      DB_PASSWORD: admin
-      DB_PORT: 3306
-    ports:
-      - "8085:8085"
-    depends_on:
-      admin_management_db:
-        condition: service_healthy
-    restart: unless-stopped
+  #admin_management_app:
+  #  build:
+  #    context: ../../..
+  #    dockerfile: Dockerfile
+  #  container_name: admin_management_app
+  #  environment:
+  #    DB_HOST: admin_management_db
+  #    DB_NAME: admin_management_db
+  #    DB_USERNAME: admin
+  #    DB_PASSWORD: admin
+  #    DB_PORT: 3306
+  #  ports:
+  #    - "8085:8085"
+  #  depends_on:
+  #    admin_management_db:
+  #      condition: service_healthy
+  #  restart: unless-stopped
 
 
   admin_management_db:

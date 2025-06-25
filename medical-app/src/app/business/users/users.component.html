@@ -1,0 +1,99 @@
+<nz-flex nzAlign="center" nzJustify="space-between">
+  <h1>Liste des comptes utilisateurs</h1>
+  <div style="display: flex; align-items: center; gap: 10px">
+    <app-search-bar></app-search-bar>
+    <app-reload-button (_onRefresh)="onRefresh()"></app-reload-button>
+    @if (can(SCOPES.CREATE, RESOURCES.ACCOUNT)) {
+      <button nz-button [nzType]="'primary'" (click)="onAdd()">
+        <span>Ajouter</span>
+      </button>
+    }
+  </div>
+</nz-flex>
+<br />
+<nz-modal
+  [(nzVisible)]="open"
+  nzTitle="{{ currentRecord ? 'Modifier' : 'Ajouter' }} un compte utilisateur"
+  (nzOnCancel)="handleCancel()"
+  [nzFooter]="null"
+  nzWidth="70%"
+  [nzStyle]="{ top: '30px' }"
+  [nzBodyStyle]="{ overflow: 'auto', maxHeight: 'calc(100vh - 120px)' }"
+>
+  <ng-container *nzModalContent>
+    <app-add-user
+      [currentRecord]="currentRecord"
+      (_onClose)="handleCancel()"
+      (_onRefresh)="onRefresh()"
+    ></app-add-user>
+  </ng-container>
+</nz-modal>
+
+<nz-table
+  #basicTable
+  nzSize="small"
+  [nzData]="listUsers"
+  [nzLoading]="loading"
+  [nzTotal]="totalElements"
+  [nzPageSize]="pageSize"
+  [nzPageIndex]="pageNumber"
+  [nzShowSizeChanger]="true"
+  [nzShowPagination]="true"
+  (nzPageIndexChange)="onPageChange($event)"
+  (nzPageSizeChange)="onPageSizeChange($event)"
+  [nzFrontPagination]="false"
+  [nzShowTotal]="rangeTemplate"
+>
+  <thead>
+    <tr>
+      <th>Prénoms</th>
+      <th>Nom</th>
+      <th>Email</th>
+      <th>Rôle</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (data of basicTable.data; track data.id) {
+    <tr>
+      <td>{{ data.firstName }}</td>
+      <td>{{ data.lastName }}</td>
+      <td>{{ data.email }}</td>
+      <td>
+        <nz-tag
+          nzColor="blue"
+          style="text-transform: uppercase"
+          >
+          {{ getAppRoleName(data.realmRoles) }}
+        </nz-tag>
+      </td>
+      <td>
+        @if (can(SCOPES.UPDATE, RESOURCES.ACCOUNT)) {
+        <button
+          nz-button
+          [nzType]="'text'"
+          style="color: var(--primary-color)"
+          (click)="onUpdate(data)"
+        >
+          <nz-icon nzType="edit" />
+        </button>
+        } &nbsp; @if (can(SCOPES.DELETE, RESOURCES.ACCOUNT)) {
+        <button
+          nz-button
+          [nzType]="'text'"
+          style="color: red"
+          (click)="onDelete(data.id)"
+        >
+          <nz-icon nzType="delete" />
+        </button>
+        }
+      </td>
+    </tr>
+    }
+  </tbody>
+</nz-table>
+
+<ng-template #totalTemplate let-total>Total {{ total }} éléments</ng-template>
+<ng-template #rangeTemplate let-range="range" let-total>
+  {{ range[0] }}-{{ range[1] }} sur {{ total }} éléments
+</ng-template>

@@ -1,0 +1,7 @@
+<nz-content [style]="{marginLeft: isCollapsed ? '80px' : '20vw', width: isCollapsed ? 'calc(100% - 80px)' : 'calc(100vw - 20vw)', transition: 'all 0.2s' }">
+  <div class="inner-content">
+    <app-breadcrumbs></app-breadcrumbs>
+    <br>
+    <router-outlet></router-outlet>
+  </div>
+</nz-content>

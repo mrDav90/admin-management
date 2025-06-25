@@ -1,0 +1,184 @@
+  <form
+    nz-form
+    nzLayout="vertical"
+    [formGroup]="addPatientForm"
+    (ngSubmit)="submitForm()"
+  >
+    <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24 }">
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="lastName" nzRequired>
+            <span>Nom </span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <input
+              nz-input
+              id="lastName"
+              formControlName="lastName"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="firstName" nzRequired>
+            <span>Prénoms</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <input
+              nz-input
+              id="firstName"
+              formControlName="firstName"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="birthDate" nzRequired>
+            <span>Date de naissance </span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Veuillez entrer la date de naissance!">
+            <nz-date-picker
+              id="birthDate"
+              formControlName="birthDate"
+            ></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24 }">
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="placeOfBirth" nzRequired>
+            <span>Lieu de naissance</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <input
+              nz-input
+              id="placeOfBirth"
+              formControlName="placeOfBirth"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="gender" nzRequired>
+            <span>Genre</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <nz-radio-group id="gender"  formControlName="gender">
+              <label nz-radio nzValue="MALE"> M</label>
+              <label nz-radio nzValue="FEMALE">F</label>
+            </nz-radio-group>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="phoneNumber" nzRequired>
+            <span>Téléphone</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <input
+              nz-input
+              id="phoneNumber"
+              formControlName="phoneNumber"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24 }">
+      
+        <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="address">
+            <span>Adresse</span>
+          </nz-form-label>
+          <nz-form-control>
+            <input
+              nz-input
+              id="address"
+              formControlName="address"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="personToNotifyName" nzRequired>
+            <span>Personne à prévenir</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <input
+              nz-input
+              id="personToNotifyName"
+              formControlName="personToNotifyName"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="personToNotifyPhoneNumber" nzRequired>
+            <span>Téléphone de la Personne à prévenir</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Ce champ est obligatoire!">
+            <input
+              nz-input
+              id="personToNotifyPhoneNumber"
+              formControlName="personToNotifyPhoneNumber"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- <div nz-col nzSpan="8">
+        <nz-form-item>
+          <nz-form-label nzFor="nationality" nzRequired>
+            <span>Nationalité</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Veuillez entrer la nationalité!">
+            <nz-select id="nationality" formControlName="nationality">
+              @for (item of nationalitiesList; track $index) {
+              <nz-option [nzValue]="item" [nzLabel]="item"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div> -->
+    </div>
+
+    <nz-flex nzAlign="center" nzJustify="center">
+      <nz-space>
+        <button
+          nz-button
+          nzType="primary"
+          [nzGhost]="true"
+          (click)="onClose()"
+        >
+          Annuler
+        </button> &nbsp;&nbsp;
+        <nz-form-item nz-row class="register-area">
+          <nz-form-control>
+            <button nz-button nzType="primary" [nzLoading]="loading" >Enregistrer</button>
+          </nz-form-control>
+        </nz-form-item>
+      </nz-space>
+    </nz-flex>
+  </form>

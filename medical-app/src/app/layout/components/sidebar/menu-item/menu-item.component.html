@@ -1,0 +1,18 @@
+@if (item.children) {
+  <ul nz-submenu [nzTitle]="item.title">
+      @for (item of item.children; track $index) {
+          <app-menu-item [item]="item"></app-menu-item>
+      }
+  </ul>
+} @else if (item.group) {
+  <ul nz-menu-group [nzTitle]="item.title">
+    @for (item of item.group; track $index) {
+        <app-menu-item [item]="item"></app-menu-item>
+    }
+</ul>
+}@else {
+  <li nz-menu-item nzMatchRouter [style]="{color : compareRoute(item.route) ? 'white' : '' , borderRadius: '8px'}">
+    <i nz-icon [nzType]="item.icon!" ></i>
+      <a [routerLink]="item.route" [style]="{color : compareRoute(item.route) ? 'white' : ''}"> {{ item.title }} </a>
+  </li>
+}

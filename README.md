@@ -57,3 +57,29 @@ password: passer
 ```
 
 ### Quelques captures
+1. Redirection vers l'interface de keycloak pour l'authentification, connexion en tant qu'admin
+![capt1](./captures/1.png)
+
+2. Liste des rôles de l'application 
+![capt2](./captures/2.png)
+
+3. Définition des permissions du rôle **app_admin**
+![capt3](./captures/3.png)
+
+4. Définition des permissions du rôle **app_infirmier**
+![capt4](./captures/4.png)
+
+5. Ajout d'un compte utilisateur avec le rôle **app_infirmier**
+![capt5](./captures/5.png)
+
+6. Liste des comptes utilisateurs
+![capt6](./captures/6.png)
+
+7. Connexion de l'utilisateur avec rôle **app_infirmier**
+![capt7](./captures/7.png)
+
+8. Espace Infirmier, on peut remarquer qu'on n'a pas accès à toutes les fonctionnalités
+![capt8](./captures/8.png)
+
+### Conclusion
+La gestion des rôles et permissions est la clé de voûte de la sécurité et de l'efficacité des SI. En appliquant le principe du moindre privilège, elle garantit que chaque utilisateur n'accède qu'aux ressources strictement nécessaires à sa fonction. Cette approche structurée minimise les risques de sécurité, assure la conformité réglementaire et simplifie l'administration. C'est donc un pilier stratégique pour la protection des données et la performance de l'entreprise.

@@ -1,4 +1,4 @@
-### Gestion des rôles et permissions avec keycloak dans une application spring-boot
+# **Gestion des rôles et permissions avec keycloak dans une application spring-boot**
 
 ### Objectif
 L'objectif du projet est de développer un système de gestion des permissions selon le rôle des utilisateurs dans une application. Pour ce faire nous allons utiliser l'outil populaire **keycloak**

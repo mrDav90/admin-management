@@ -6,9 +6,11 @@ un outil de gestion des identités et des accès.
 
 ### Prérequis
 ```
-Java 17 
-Docker 
 Maven
+Java 17
+Node 20
+Angular 19
+Docker 
 ```
 
 ### Clone du projet

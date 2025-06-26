@@ -83,5 +83,8 @@ password: passer
 8. Espace Infirmier, on peut remarquer qu'on n'a pas accès à toutes les fonctionnalités
 ![capt8](./captures/8.png)
 
+**NB**: En cas de soucis d'autorisation, générer un secret token sur keycloak, dans le client privé **admin-management-client**.
+Ensuite copier dans la variable d'environnement **CLIENT_SECRET** ou le mettre directement dans le application.yml
+
 ### Conclusion
 La gestion des rôles et permissions est la clé de voûte de la sécurité et de l'efficacité des SI. En appliquant le principe du moindre privilège, elle garantit que chaque utilisateur n'accède qu'aux ressources strictement nécessaires à sa fonction. Cette approche structurée minimise les risques de sécurité, assure la conformité réglementaire et simplifie l'administration. C'est donc un pilier stratégique pour la protection des données et la performance de l'entreprise.

@@ -83,7 +83,7 @@ password: passer
 8. Espace Infirmier, on peut remarquer qu'on n'a pas accès à toutes les fonctionnalités
 ![capt8](./captures/8.png)
 
-**NB**: En cas de soucis d'autorisation, générer un secret token sur keycloak, dans le client privé **admin-management-client**.
+**NB**: En cas de soucis d'autorisation, générer un client secret sur keycloak, dans le client privé **admin-management-client**.
 Ensuite copier dans la variable d'environnement **CLIENT_SECRET** ou le mettre directement dans le application.yml
 
 ### Conclusion
